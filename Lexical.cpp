@@ -1,6 +1,6 @@
 #include <exception>
 #include <iostream>
-#include <iomanip>
+#include <stack>
 
 #include "Lexical.h"
 
@@ -288,5 +288,13 @@ void Lexical::destroyTokens(TokenStream *tokens) {
         }
 
         delete(tokens);
+    }
+}
+
+void Lexical::displayTokens(TokenStream *tokens) {
+    TokenStream::iterator i;
+
+    for (i = tokens->begin(); i != tokens->end(); ++i) {
+        cout << "<" << str_tokens[(*i)->type] << " " << (*i)->symbol << ">" << endl;
     }
 }

@@ -1,33 +1,36 @@
 #include <iostream>
-#include <fstream>	
+#include <fstream>  
 
 #include "Lexical.h"
+#include "Syntax.h"
 
 using namespace std;
 
 int main(int argc, char *args[]) {
-	string infilename;
-	ofstream output("salida.txt");
-	
-	Lexical lex;
-	TokenStream *tokens;
+    string infilename;
+    ofstream output("salida.txt");
+    
+    Lexical lex;
+    Syntax parser;
+    TokenStream *tokens;
 
-	TokenStream::iterator i;
+    if (argc == 2) {
+        infilename = args[1];
+    } else {
+        infilename = "entrada.txt";
+    }
 
-	if (argc == 2) {
-		infilename = args[1];
-	} else {
-		infilename = "entrada.txt";
-	}
+    try {
+        tokens = lex.analyze(infilename);       
 
-	try {
-		tokens = lex.analyze(infilename);
-		lex.destroyTokens(tokens);
+        parser.analyze(tokens);
 
-		output << 1;
-	} catch (int e) {
-		output << 0;
-	}
+        lex.destroyTokens(tokens);
 
-	output.close();
+        output << 1;
+    } catch (int e) {
+        output << 0;
+    }
+
+    output.close();
 }
