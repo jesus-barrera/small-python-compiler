@@ -2,6 +2,7 @@
 #include <exception>
 
 #include "Syntax.h"
+#include "syntax_tree.h"
 
 using namespace std;
 
