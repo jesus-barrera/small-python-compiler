@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include "Lexical.h"
+#include "syntax_tree.h"
 
 using namespace std;
 
@@ -12,21 +13,21 @@ private:
 	Token lookahead;
 
 public:
-	void analyze(TokenStream *tkn_stream);
+	Node *analyze(TokenStream *tkn_stream);
 
-	void statementList();
-	void statement();
-	void ifStatement();
-	void whileStatement();
-	void printStatement();
-	void assignmentStatement();
-	void compoundStatement();
-	void expr();
-	void relationalExpr();
-	void additiveExpr();
-	void multiplicativeExpr();
-	void unaryExpr();
-	void primaryExpr();
+	Node *statementList();
+	Node *statement();
+	IfStatement *ifStatement();
+	WhileStatement *whileStatement();
+	PrintStatement *printStatement();
+	Assignment *assignmentStatement();
+	Node *compoundStatement();
+	Expression *expression();
+	Expression *relationalExpr();
+	Expression *additiveExpr();
+	Expression *multiplicativeExpr();
+	Expression *unaryExpr();
+	Expression *primaryExpr();
 
 	void nextToken();
 	void match(int tkn_type);

@@ -2,141 +2,222 @@
 #include <exception>
 
 #include "Syntax.h"
-#include "syntax_tree.h"
 
 using namespace std;
 
-void Syntax::analyze(TokenStream *tkn_stream) {
+Node *Syntax::analyze(TokenStream *tkn_stream) {
+    Node *tree;
+
     this->tkn_stream = *tkn_stream; // make a copy
-    nextToken();
     
-    statementList();
+    nextToken();
+    tree = statementList();
     match(TKN_EOF);
+
+    return tree;
 }
 
-void Syntax::statementList() {
+Node *Syntax::statementList() {
+    Node *stmts = NULL;
+    
     if (lookahead.is("if") || 
         lookahead.is("while") ||
         lookahead.is("print") ||
         lookahead.is(TKN_IDENTIFIER)) {
 
-        statement();
-        statementList();
+        stmts = statement();
+        stmts->next = statementList();
     }
+
+    return stmts;
 }
 
-void Syntax::statement() {
+Node *Syntax::statement() {
     if (lookahead.is("if")) {
-        ifStatement();
+        return ifStatement();
     } else if (lookahead.is("while")) {
-        whileStatement();
+        return whileStatement();
     } else if (lookahead.is("print")) {
-        printStatement();
+        return printStatement();
     } else {
-        assignmentStatement();
+        return assignmentStatement();
     }
 }
 
-void Syntax::ifStatement() {
+IfStatement *Syntax::ifStatement() {
+    Expression *expr;
+    Node *stmt;
+    Node *elseStmt;
+    
     match("if");
-    expr();
+    expr = expression();
     match(":");
-    compoundStatement();
+    
+    stmt = compoundStatement();
 
     if (lookahead.is("else")) {
         match("else");
         match(":");
-        compoundStatement();
+
+        elseStmt = compoundStatement();
+    } else {
+        elseStmt = NULL;
     }
+
+    return new IfStatement(expr, stmt, elseStmt);
 }
 
-void Syntax::whileStatement() {
+WhileStatement *Syntax::whileStatement() {
+    Expression *expr;
+    Node *stmt;
+
     match("while");
-    expr();
+    expr = expression();
     match(":");
-    compoundStatement();
+    stmt = compoundStatement();
+
+    return new WhileStatement(expr, stmt);
 }
 
-void Syntax::printStatement() {
+PrintStatement *Syntax::printStatement() {
+    Expression *expr;
+
     match("print");
     match("(");
-    expr();
+    expr = expression();
     match(")");
     match(TKN_NEWLINE);
+
+    return new PrintStatement(expr);
 }
 
-void Syntax::assignmentStatement() {
+Assignment *Syntax::assignmentStatement() {
+    Expression *expr;
+    Identifier *id;
+
+    id = new Identifier(lookahead.symbol);
+
     match(TKN_IDENTIFIER);
     match("=");
-    expr();
+    expr = expression();
     match(TKN_NEWLINE);
+
+    return new Assignment(id, expr);
 }
 
-void Syntax::compoundStatement() {
+Node *Syntax::compoundStatement() {
+    Node *stmts;
+
     match(TKN_NEWLINE);
     match(TKN_INDENT);
-    statement();
-    statementList();
+    stmts = statement();
+    stmts->next = statementList();
     match(TKN_DEDENT);
+
+    return stmts;
 }
 
-void Syntax::expr() {
-    relationalExpr();
+Expression *Syntax::expression() {
+    Expression *expr;
+    string op;
+
+    expr = relationalExpr();
 
     while (lookahead.is(TKN_OP_EQUALITY)) {
+        op = lookahead.symbol;
+
         match(TKN_OP_EQUALITY);
-        relationalExpr();
+        expr = new EqualityExpr(op, expr, relationalExpr());
     }
+
+    return expr;
 }
 
-void Syntax::relationalExpr() {
-    additiveExpr();
+Expression *Syntax::relationalExpr() {
+    Expression *expr;
+    string op;
+    
+    expr = additiveExpr();
 
     while (lookahead.is(TKN_OP_RELATIONAL)) {
+        op = lookahead.symbol;
+
         match(TKN_OP_RELATIONAL);
-        additiveExpr();
+        expr = new RelationalExpr(op, expr, additiveExpr());
     }
+
+    return expr;
 }
 
-void Syntax::additiveExpr() {
-    multiplicativeExpr();
+Expression *Syntax::additiveExpr() {
+    Expression *expr;
+    string op;
+    
+    expr = multiplicativeExpr();
 
     while (lookahead.is(TKN_OP_ADD)) {
+        op = lookahead.symbol;
+
         match(TKN_OP_ADD);
-        multiplicativeExpr();
+        expr = new AdditiveExpr(op, expr, multiplicativeExpr());
     }
+
+    return expr;
 }
 
-void Syntax::multiplicativeExpr() {
-    unaryExpr();
+Expression *Syntax::multiplicativeExpr() {
+    Expression *expr;
+    string op;
+    
+    expr = unaryExpr();
 
     while (lookahead.is(TKN_OP_MULT)) {
+        op = lookahead.symbol;
+
         match(TKN_OP_MULT);
-        unaryExpr();
+        expr = new MultiplicativeExpr(op, expr, unaryExpr());
     }
+
+    return expr;
 }
 
-void Syntax::unaryExpr() {
+Expression *Syntax::unaryExpr() {
+    Expression *expr;
+
     if (lookahead.is(TKN_OP_ADD)) {
+        string op = lookahead.symbol;
+
         match(TKN_OP_ADD);
-        unaryExpr();
+        expr = new UnaryExpr(op, unaryExpr());
     } else {
-        primaryExpr();
+        expr = primaryExpr();
     }
+
+    return expr;
 }
 
-void Syntax::primaryExpr() {
+Expression *Syntax::primaryExpr() {
+    Expression *expr;
+    string symbol;
+
+    symbol = lookahead.symbol;
+    
     if (lookahead.is(TKN_INTEGER)) {
         match(TKN_INTEGER);
+        expr = new Integer(symbol);
     } else if (lookahead.is(TKN_FLOAT)) {
         match(TKN_FLOAT);
+        expr = new Float(symbol);
     } else if (lookahead.is(TKN_IDENTIFIER)) {
         match(TKN_IDENTIFIER); 
+        expr = new Identifier(symbol);
     } else {
         match("(");
-        expr();
+        expr = expression();
         match(")");
     }
+
+    return expr;
 }
 
 void Syntax::nextToken() {

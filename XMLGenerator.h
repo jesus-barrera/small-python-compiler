@@ -17,6 +17,7 @@ private:
 	bool single_line;
 
 public:	
+	bool enable_tabs;
 	void setoutput(ostream *output);
 	void openTag(string tag_name, string value = "");
 	void closeTag();

@@ -9,6 +9,7 @@ using namespace std;
 int main(int argc, char *args[]) {
     string infilename;
     ofstream output("salida.txt");
+    Node *tree;
     
     Lexical lex;
     Syntax parser;
@@ -23,11 +24,16 @@ int main(int argc, char *args[]) {
     try {
         tokens = lex.analyze(infilename);       
 
-        parser.analyze(tokens);
+        tree = parser.analyze(tokens);
+        
+        if (Node::checkSemanticOnList(tree) == TYPE_ERROR) {
+            throw 0;
+        }
+        
+        Node::generateCode(tree, output);
 
         lex.destroyTokens(tokens);
-
-        output << 1;
+        delete(tree);
     } catch (int e) {
         output << 0;
     }

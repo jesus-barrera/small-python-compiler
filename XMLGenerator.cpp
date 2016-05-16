@@ -1,5 +1,13 @@
 #include "XMLGenerator.h"
 
+void replace(string& str, string old_str, string new_str) {
+	size_t pos;
+
+	if ((pos = str.find(old_str)) != string::npos) {
+		str.replace(pos, old_str.size(), new_str);
+	}
+}
+
 void XMLGenerator::setoutput(ostream *output) {
 	this->output = output;
 }
@@ -8,7 +16,10 @@ void XMLGenerator::openTag(string tag_name, string value) {
 	string tag = "<" +  tag_name;
 
 	if (value != "") {
-		tag += " value=\"" + value +  "\""; 
+		replace(value, "<", "&lt;");
+		replace(value, ">", "&gt;");
+		
+		tag += " value=\"" + value +  "\"";
 	}
 
 	tag += ">";
@@ -33,5 +44,9 @@ void XMLGenerator::oneLineTag(string tag_name, string content) {
 }
 
 void XMLGenerator::put(string str) {
-	*output << SET_TABS(tabs) << str << endl;
+	if (enable_tabs) {
+		*output << SET_TABS(tabs) << str << endl;
+	} else {
+		*output << str << endl;
+	}
 }
