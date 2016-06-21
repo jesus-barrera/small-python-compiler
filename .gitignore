@@ -1,5 +1,5 @@
 *.exe
 *.dia~
 *.txt
-*.asm
+*.sasm
 *.obj

@@ -24,11 +24,11 @@ void Node::checkSemantic() {
 	this->type = TYPE_ERROR;
 }
 
-void Node::generateCode(ostream &output) {
+void Node::generateCode(fstream &output) {
 	output << "; codigo" << endl;
 }
 
-void Node::generateCode(Node *tree, ostream &output) {
+void Node::generateCode(Node *tree, fstream &output) {
 	// Directivas
 	output << ".386" << endl;
 	output << ".model flat, stdcall" << endl;
@@ -84,7 +84,7 @@ int Node::checkSemanticOnList(Node *node) {
 	return type;
 }
 
-void Node::generateCodeOnList(Node *node, ostream &output) {
+void Node::generateCodeOnList(Node *node, fstream &output) {
 	while (node) {
 		node->generateCode(output);
 		node = node->next;
@@ -143,7 +143,7 @@ void Identifier::checkSemantic() {
 	}
 }
 
-void Identifier::generateCode(ostream &output) {
+void Identifier::generateCode(fstream &output) {
 	output << "push " << this->symbol << endl;
 }
 
@@ -160,7 +160,7 @@ void Integer::checkSemantic() {
 	this->type = TYPE_INTEGER;
 }
 
-void Integer::generateCode(ostream &output) {
+void Integer::generateCode(fstream &output) {
 	output << "push " << this->symbol << endl;
 }
 
@@ -177,7 +177,7 @@ void Float::checkSemantic() {
 	this->type = TYPE_FLOAT;
 }
 
-void Float::generateCode(ostream &output) {
+void Float::generateCode(fstream &output) {
 	output << "push " << this->symbol;
 }
 
@@ -219,7 +219,7 @@ void BinaryExpr::checkSemantic() {
 EqualityExpr::EqualityExpr(string op, Expression *left, Expression* right)
 		: BinaryExpr(op, left, right) {}
 
-void EqualityExpr::generateCode(ostream &output) {
+void EqualityExpr::generateCode(fstream &output) {
 	string true_label, end_label;
 
 	true_label  = generateUniqueLabel("VERDADERO");
@@ -249,7 +249,7 @@ RelationalExpr::RelationalExpr(string op, Expression *left, Expression* right)
 /**
  * TODO: Reuse code from EqualityExpr
  */
-void RelationalExpr::generateCode(ostream &output) {
+void RelationalExpr::generateCode(fstream &output) {
 	string true_label, end_label;
 
 	true_label  = generateUniqueLabel("VERDADERO");
@@ -277,7 +277,7 @@ void RelationalExpr::generateCode(ostream &output) {
 AdditiveExpr::AdditiveExpr(string op, Expression *left, Expression* right) 
 		: BinaryExpr(op, left, right, "SUMA") {}
 
-void AdditiveExpr::generateCode(ostream &output) {
+void AdditiveExpr::generateCode(fstream &output) {
 	output << "; EXPRESION ADDITIVA" << endl;
 	
 	this->left->generateCode(output);
@@ -299,7 +299,7 @@ void AdditiveExpr::generateCode(ostream &output) {
 MultiplicativeExpr::MultiplicativeExpr(string op, Expression *left, Expression* right) 
 		: BinaryExpr(op, left, right, "MULT") {}
 
-void MultiplicativeExpr::generateCode(ostream &output) {
+void MultiplicativeExpr::generateCode(fstream &output) {
 	output << "; EXPRESION MULTIPLICATIVA" << endl;
 	
 	this->left->generateCode(output);
@@ -308,13 +308,13 @@ void MultiplicativeExpr::generateCode(ostream &output) {
 	output << "pop ebx" << endl;
 	output << "pop eax" << endl;
 
-	output << "xor edx, edx" << endl;
 	
 	if (this->op == "*") {
 		output << "imul ebx" << endl;
 		output << "push eax" << endl;
 
 	} else if (this->op == "/" || this->op == "%") {
+		output << "xor edx, edx" << endl;
 		output << "idiv ebx" << endl;
 
 		if (this->op == "/") {
@@ -347,7 +347,7 @@ void UnaryExpr::checkSemantic() {
 	this->type = this->expr->type;
 }
 
-void UnaryExpr::generateCode(ostream &output) {
+void UnaryExpr::generateCode(fstream &output) {
 	output << "; EXPRESION UNARIA" << endl;
 
 	this->expr->generateCode(output);
@@ -395,7 +395,7 @@ void IfStatement::checkSemantic() {
 	}
 }
 
-void IfStatement::generateCode(ostream &output) {
+void IfStatement::generateCode(fstream &output) {
 	string end_label, else_label;
 
 	else_label = generateUniqueLabel("ELSE_IF");
@@ -444,7 +444,7 @@ void WhileStatement::checkSemantic() {
 	}
 }
 
-void WhileStatement::generateCode(ostream &output) {
+void WhileStatement::generateCode(fstream &output) {
 	string while_label, end_label;
 
 	while_label = generateUniqueLabel("WHILE");
@@ -489,13 +489,12 @@ void PrintStatement::checkSemantic() {
 	}
 }
 
-void PrintStatement::generateCode(ostream &output) {
+void PrintStatement::generateCode(fstream &output) {
 	output << "; SENTENCIA PRINT" << endl;
 
 	this->expr->generateCode(output);
 	output << "pop eax" << endl;
-	output << "print str$(eax)" << endl;
-	output << "print chr$(10)" << endl;
+	output << "print str$(eax), 10" << endl;
 }
 
 /* Assignment statement methods */
@@ -541,7 +540,7 @@ void Assignment::checkSemantic() {
 	}
 }
 
-void Assignment::generateCode(ostream &output) {
+void Assignment::generateCode(fstream &output) {
 	output << "; SENTENCIA ASIGNACION" << endl;
 
 	this->expr->generateCode(output);

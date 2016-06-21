@@ -19,6 +19,7 @@ protected:
 	
 	static string generateUniqueLabel(string label);
 	static string conditionalJump(string op);
+
 public:
 	static XMLGenerator xml;
 	static SymbolsTable symtab;
@@ -30,12 +31,12 @@ public:
 	~Node();
 	virtual void display();
 	virtual void checkSemantic();
-	virtual void generateCode(ostream &output);
+	virtual void generateCode(fstream &output);
 
-	static void generateCode(Node *tree, ostream &output);
+	static void generateCode(Node *tree, fstream &output);
 	static void displayList(string wrapper_tag, Node*  node);
 	static int checkSemanticOnList(Node*  node);
-	static void generateCodeOnList(Node *node, ostream &output);
+	static void generateCodeOnList(Node *node, fstream &output);
 };
 
 class Expression: public Node {
@@ -49,7 +50,7 @@ public:
 
 	void display();
 	void checkSemantic();
-	void generateCode(ostream &output);
+	void generateCode(fstream &output);
 };
 
 class Integer: public Expression {
@@ -58,7 +59,7 @@ public:
 
 	void display();
 	void checkSemantic();
-	void generateCode(ostream &output);
+	void generateCode(fstream &output);
 };
 
 class Float: public Expression {
@@ -67,7 +68,7 @@ public:
 
 	void display();
 	void checkSemantic();
-	void generateCode(ostream &output);
+	void generateCode(fstream &output);
 };
 
 class BinaryExpr: public Expression {
@@ -88,28 +89,28 @@ class EqualityExpr: public BinaryExpr {
 public:
 	EqualityExpr(string op, Expression *left, Expression* right);
 	
-	void generateCode(ostream &output);
+	void generateCode(fstream &output);
 };
 
 class RelationalExpr: public BinaryExpr {
 public:
 	RelationalExpr(string op, Expression *left, Expression* right);
 	
-	void generateCode(ostream &output);
+	void generateCode(fstream &output);
 };
 
 class AdditiveExpr: public BinaryExpr {
 public:
 	AdditiveExpr(string op, Expression *left, Expression* right);
 
-	void generateCode(ostream &output);
+	void generateCode(fstream &output);
 };
 
 class MultiplicativeExpr: public BinaryExpr {
 public:
 	MultiplicativeExpr(string op, Expression *left, Expression* right);
 
-	void generateCode(ostream &output);
+	void generateCode(fstream &output);
 };
 
 class UnaryExpr: public Expression {
@@ -122,7 +123,7 @@ public:
 
 	void display();
 	void checkSemantic();
-	void generateCode(ostream &output);
+	void generateCode(fstream &output);
 };
 
 class IfStatement: public Node {
@@ -136,7 +137,7 @@ public:
 
 	void display();
 	void checkSemantic();
-	void generateCode(ostream &output);
+	void generateCode(fstream &output);
 };
 
 class WhileStatement: public Node {
@@ -149,7 +150,7 @@ public:
 
 	void display();
 	void checkSemantic();
-	void generateCode(ostream &output);
+	void generateCode(fstream &output);
 };
 
 class PrintStatement: public Node {
@@ -161,7 +162,7 @@ public:
 
 	void display();
 	void checkSemantic();
-	void generateCode(ostream &output);
+	void generateCode(fstream &output);
 };
 
 class Assignment: public Node {
@@ -174,7 +175,7 @@ public:
 
 	void display();
 	void checkSemantic();
-	void generateCode(ostream &output);
+	void generateCode(fstream &output);
 };
 
 #endif

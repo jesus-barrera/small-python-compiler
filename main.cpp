@@ -8,7 +8,7 @@ using namespace std;
 
 int main(int argc, char *args[]) {
     string infilename;
-    ofstream output("salida.txt");
+    fstream output("salida.txt", ios::out);
     Node *tree;
     
     Lexical lex;
